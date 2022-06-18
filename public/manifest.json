@@ -1,0 +1,30 @@
+{
+  "name": "Swagger Extension",
+  "description": "For lazy man",
+  "version": "0.0.1",
+  "manifest_version": 3,
+  "action": {
+    "default_popup": "index.html",
+    "default_title": ""
+  },
+  "icons": {
+    "16": "32x32.png",
+    "48": "32x32.png",
+    "128": "32x32.png"
+  },
+  "permissions": [
+    "storage",
+    "tabs",
+    "activeTab",
+    "scripting",
+    "contentSettings"
+  ],
+  "host_permissions": ["*://*/*"],
+  "content_scripts": [
+    {
+      "matches": ["*://*/*"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ]
+}
