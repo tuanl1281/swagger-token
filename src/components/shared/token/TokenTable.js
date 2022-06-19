@@ -69,7 +69,7 @@ const TokenTable = () => {
   const [openCreate, setOpenCreate] = useState(false);
   const [updateDetails, setUpdateDetails] = useState(undefined);
 
-  const { setToken } = useSwagger();
+  const { setToken, setFavoriteToken: setFavoriteTokenWithoutDispatch } = useSwagger();
   const dispatch = useDispatch();
   const { selectedDomain: domain, domainList } = useSelector((state) => state.domain);
 
@@ -91,7 +91,14 @@ const TokenTable = () => {
                 </ListItemLabelSub>
               </ListItemLabel>
               <ListItemLabelTool>
-                <HeaderIcon active={t?.isFavorite} content="ࠏ" onClick={() => dispatch(setFavoriteToken(t, selectedDomain?.id))} />
+                <HeaderIcon
+                  active={t?.isFavorite}
+                  content="ࠏ"
+                  onClick={() => {
+                    dispatch(setFavoriteToken(t, selectedDomain?.id));
+                    setFavoriteTokenWithoutDispatch(t?.value);
+                  }}
+                />
                 <HeaderIcon content="★" onClick={() => setToken(t?.value)} />
                 <HeaderIcon content="✎" onClick={() => setUpdateDetails(t, selectedDomain?.id)} />
                 <HeaderIcon content="✕" onClick={() => setConfirm(t)} />

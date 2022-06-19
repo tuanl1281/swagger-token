@@ -19,12 +19,16 @@
     "scripting",
     "contentSettings"
   ],
-  "host_permissions": ["*://*/*"],
+  "host_permissions": ["*://*/swagger/*"],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
   "content_scripts": [
     {
-      "matches": ["*://*/*"],
+      "matches": ["*://*/swagger/*"],
       "js": ["content.js"],
-      "run_at": "document_end"
+      "run_at": "document_start"
     }
   ]
 }

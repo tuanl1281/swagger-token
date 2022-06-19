@@ -1,12 +1,12 @@
 import { useMemo, useCallback } from 'react';
-import { useSelector } from 'react-redux';
 
 const types = {
+  INITIAL: 'INITIAL',
   EXECUTE: 'EXECUTE',
+  SET_TOKEN_FAVORITE: 'SET_TOKEN_FAVORITE',
 };
 
 const useSwagger = () => {
-  const { domainList } = useSelector((state) => state.domain);
   const browser = useMemo(() => window?.chrome ? window.chrome : window.browser, []);
 
   const getCurrent = useCallback(() => new Promise((resolve, reject) => {
@@ -46,23 +46,14 @@ const useSwagger = () => {
   const setToken = useCallback(async (token) => {
     const current = await getCurrent();
     if (current?.id) {
-      const scripting = `(function(r){var e={JWT:{name:"JWT",schema:{type:"apiKey",description:"Type into the textbox: Bearer {your JWT token}.",name:"Authorization",in:"header"},value:r}};ui.authActions.authorize(e)})("${token}")`;
+      const scripting = `(function(r){var e={JWT:{name:"JWT",schema:{type:"apiKey",description:"Type into the textbox: Bearer {your JWT token}.",name:"Authorization",in:"header"},value:r}};ui.authActions.authorize(e)})("bearer ${token}")`;
       browser.tabs.sendMessage(current.id, { type: types.EXECUTE, message: scripting });
     }
   }, [getCurrent, browser]);
 
-  const setFavoriteToken = useCallback(async () => {
+  const setFavoriteToken = useCallback(async (token) => {
     try {
-      const current = await getCurrent();
-      if (current?.url) {
-        const domain = domainList.find((d) => current.url.includes(d.name));
-        if (domain) {
-          const favoriteToken = domain.tokenList.find((t) => t?.isFavorite);
-          if (favoriteToken) {
-            setToken(favoriteToken.value);
-          }
-        }
-      }
+      browser.runtime.sendMessage({ type: types.SET_TOKEN_FAVORITE, message: token });
     // eslint-disable-next-line
     } catch (error) {}
   // eslint-disable-next-line
@@ -70,6 +61,7 @@ const useSwagger = () => {
 
   return {
     browser,
+    getCurrent,
     getDomain,
     getToken,
     setToken,

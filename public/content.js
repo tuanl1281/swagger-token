@@ -1,5 +1,6 @@
-/* global chrome */
+const browser = window?.chrome ? window.chrome : window.browser;
 const types = {
+  INITIAL: 'INITIAL',
   EXECUTE: 'EXECUTE',
 };
 
@@ -9,7 +10,7 @@ const embeddedScript = (script) => {
   document.documentElement.removeAttribute('onreset');
 };
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+const parseResponse = (request, sender, sendResponse) => {
   if (request?.type) {
     const { type, message } = request;
 
@@ -26,4 +27,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         break;
     }
   }
+};
+
+/* Initial */
+document.addEventListener('DOMContentLoaded', () => {
+  browser.runtime.sendMessage({ type: types.INITIAL });
+  // eslint-disable-next-line no-console
+  console.log('Initial swager token 🚀🚀🚀');
 });
+
+/* Listen */
+browser.runtime.onMessage.addListener(parseResponse);
