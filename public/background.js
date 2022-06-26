@@ -1,6 +1,7 @@
 /* global chrome */
+/* global browser */
 const storages = {
-  TOKEN: 'TOKEN',
+  SWAGGER_TOKEN: 'SWAGGER_TOKEN',
 };
 
 const types = {
@@ -9,6 +10,10 @@ const types = {
   SET_TOKEN_FAVORITE: 'SET_TOKEN_FAVORITE',
 };
 
+if (typeof browser === 'undefined') {
+  var browser = chrome;
+}
+
 const parseResponse = (request, sender, sendResponse) => {
   if (request?.type) {
     const { type, message } = request;
@@ -16,20 +21,13 @@ const parseResponse = (request, sender, sendResponse) => {
     switch (type) {
       case types.INITIAL: {
         // eslint-disable-next-line no-unused-expressions
-        chrome?.storage?.local?.get(storages.TOKEN, (result) => {
-          const token = result[storages.TOKEN];
-          if (token) {
-            chrome?.tabs?.query({ active: true, currentWindow: true }).then((result) => {
-              const [tab] = result;
-              if (tab?.id) {
-                const scripting = `(function(r){var e={JWT:{name:"JWT",schema:{type:"apiKey",description:"Type into the textbox: Bearer {your JWT token}.",name:"Authorization",in:"header"},value:r}};ui.authActions.authorize(e)})("bearer ${token}")`;
-                chrome?.tabs?.sendMessage(tab.id, { type: types.EXECUTE, message: scripting });
-              }
-            });
-          }
-        });
-        browser?.storage?.local?.get(storages.TOKEN, (result) => {
-          const token = result[storages.TOKEN];
+        browser?.storage?.local?.get(storages.SWAGGER_TOKEN, (result) => {
+          let storage = result[storages.SWAGGER_TOKEN];
+          if (!storage || !Array.isArray(storage))
+            storage = [];
+
+          const token = storage.find((s) => s.domain === message)?.token;
+          console.log(storage, message, token);
           if (token) {
             browser?.tabs?.query({ active: true, currentWindow: true }).then((result) => {
               const [tab] = result;
@@ -43,11 +41,28 @@ const parseResponse = (request, sender, sendResponse) => {
         break;
       }
       case types.SET_TOKEN_FAVORITE: {
-        const storage = {};
-        storage[storages.TOKEN] = message;
+        const parser = JSON.parse(message);
         // eslint-disable-next-line no-unused-expressions
-        chrome?.storage?.local?.set(storage);
-        browser?.storage?.local?.set(storage);
+        browser?.storage?.local?.get(storages.SWAGGER_TOKEN, (result) => {
+          let storage = result[storages.SWAGGER_TOKEN];
+          if (!storage || !Array.isArray(storage))
+            storage = [];
+
+          let newestStorage = [];
+          if (!storage.find((s) => s.domain === parser.domain)?.token)
+            newestStorage = [...storage, parser];
+          else {
+            newestStorage = storage.reduce((result, { domain, token }) => {
+              if (domain === parser.domain)
+                return [...result, { domain, token: parser.token }];
+              return [...result, { domain, token }];
+            }, []);
+          }
+
+          result[storages.SWAGGER_TOKEN] = newestStorage;
+          // eslint-disable-next-line no-unused-expressions
+          browser?.storage?.local?.set(result, () => {});
+        });
         break;
       }
       default:
@@ -60,5 +75,4 @@ const parseResponse = (request, sender, sendResponse) => {
 };
 
 /* Listen */
-chrome?.runtime?.onMessage.addListener(parseResponse);
 browser?.runtime?.onMessage.addListener(parseResponse);

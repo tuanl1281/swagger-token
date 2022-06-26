@@ -53,7 +53,8 @@ const useSwagger = () => {
 
   const setFavoriteToken = useCallback(async (token) => {
     try {
-      browser.runtime.sendMessage({ type: types.SET_TOKEN_FAVORITE, message: token });
+      const domain = await getDomain();
+      browser.runtime.sendMessage({ type: types.SET_TOKEN_FAVORITE, message: JSON.stringify({ domain, token }) });
     // eslint-disable-next-line
     } catch (error) {}
   // eslint-disable-next-line

@@ -1,8 +1,9 @@
-const browser = window?.chrome ? window.chrome : window.browser;
 const types = {
   INITIAL: 'INITIAL',
   EXECUTE: 'EXECUTE',
 };
+
+const browser = window?.chrome ? window.chrome : window.browser;
 
 const embeddedScript = (script) => {
   document.documentElement.setAttribute('onreset', script);
@@ -31,7 +32,7 @@ const parseResponse = (request, sender, sendResponse) => {
 
 /* Initial */
 document.addEventListener('DOMContentLoaded', () => {
-  browser.runtime.sendMessage({ type: types.INITIAL });
+  browser.runtime.sendMessage({ type: types.INITIAL, message: window.location.host });
   // eslint-disable-next-line no-console
   console.log('Initial swager token 🚀🚀🚀');
 });
