@@ -23,7 +23,7 @@ const useSwagger = () => {
         const parser = document.createElement('a');
         parser.href = current.url;
 
-        return parser.hostname;
+        return parser.host;
       }
     // eslint-disable-next-line no-empty
     } catch (error) {}

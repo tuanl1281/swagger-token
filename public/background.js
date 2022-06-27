@@ -27,7 +27,6 @@ const parseResponse = (request, sender, sendResponse) => {
             storage = [];
 
           const token = storage.find((s) => s.domain === message)?.token;
-          console.log(storage, message, token);
           if (token) {
             browser?.tabs?.query({ active: true, currentWindow: true }).then((result) => {
               const [tab] = result;
